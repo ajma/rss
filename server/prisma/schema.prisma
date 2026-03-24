@@ -64,6 +64,7 @@ model Article {
   feedId       String
   title        String
   content      String?
+  fullContent  String?
   snippet      String?
   url          String?
   author       String?

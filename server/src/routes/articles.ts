@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { extractArticleContent } from '../services/contentExtractor';
 
 export const articlesRouter = Router();
 
@@ -147,6 +148,25 @@ articlesRouter.get('/:id', async (req: AuthRequest, res: Response): Promise<void
     });
 
     const userArticle = article.userArticles[0];
+
+    // Determine the best content to return:
+    // 1. Use cached fullContent from Readability if available
+    // 2. Otherwise, try to extract from the original URL
+    // 3. Fall back to RSS feed content
+    let articleContent = article.fullContent || article.content;
+
+    if (!article.fullContent && article.url) {
+      const extracted = await extractArticleContent(article.url);
+      if (extracted) {
+        articleContent = extracted;
+        // Cache the extracted content for future requests
+        await prisma.article.update({
+          where: { id },
+          data: { fullContent: extracted },
+        });
+      }
+    }
+
     res.json({
       article: {
         id: article.id,
@@ -154,7 +174,7 @@ articlesRouter.get('/:id', async (req: AuthRequest, res: Response): Promise<void
         feedTitle: article.feed.title,
         feedFaviconUrl: article.feed.faviconUrl,
         title: article.title,
-        content: article.content,
+        content: articleContent,
         snippet: article.snippet,
         url: article.url,
         author: article.author,
