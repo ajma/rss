@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ExternalLink, Bookmark, BookmarkCheck, MoreHorizontal } from 'lucide-react';
+import { ExternalLink, Bookmark, BookmarkCheck, MoreHorizontal, Loader2 } from 'lucide-react';
 import { useArticle, useMarkArticleRead, useToggleArticleSaved } from '../hooks/useArticles';
 import type { Article } from '../api/articles';
 
@@ -35,7 +35,7 @@ export default function ArticleRow({ article, isExpanded, onToggle }: ArticleRow
   const toggleSavedMutation = useToggleArticleSaved();
 
   // Fetch full content when expanded
-  const { data: fullArticle } = useArticle(isExpanded ? article.id : null);
+  const { data: fullArticle, isLoading: isLoadingContent } = useArticle(isExpanded ? article.id : null);
 
   useEffect(() => {
     if (isExpanded) {
@@ -198,12 +198,26 @@ export default function ArticleRow({ article, isExpanded, onToggle }: ArticleRow
             </div>
 
             {/* Article body */}
-            <div
-              className="article-content prose prose-sm max-w-none text-gray-700 leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: fullArticle?.content || article.snippet || 'Loading...',
-              }}
-            />
+            {isLoadingContent ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-3">
+                <Loader2 size={24} className="animate-spin text-accent-blue" />
+                <span className="text-sm text-gray-400">Fetching full article…</span>
+                <div className="w-full mt-2 space-y-3">
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-full" />
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-5/6" />
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-4/6" />
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-full" />
+                  <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4" />
+                </div>
+              </div>
+            ) : (
+              <div
+                className="article-content prose prose-sm max-w-none text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: fullArticle?.content || article.snippet || '',
+                }}
+              />
+            )}
           </div>
         </div>
       )}
