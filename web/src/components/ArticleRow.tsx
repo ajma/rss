@@ -59,6 +59,11 @@ export default function ArticleRow({ article, isExpanded, onToggle, isFocused = 
     }
   }, [isFocused]);
 
+  const handleToggleRead = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    markReadMutation.mutate({ id: article.id, isRead: !article.isRead });
+  };
+
   const handleToggleSaved = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleSavedMutation.mutate({ id: article.id, isSaved: !article.isSaved });
@@ -88,10 +93,16 @@ export default function ArticleRow({ article, isExpanded, onToggle, isFocused = 
         className="flex items-center w-full text-left px-4 py-2.5 gap-3 group"
       >
         {/* Unread indicator */}
-        <div className="w-2 shrink-0 flex justify-center">
-          {!article.isRead && (
-            <div className="w-2 h-2 rounded-full bg-unread" />
-          )}
+        <div className="w-4 shrink-0 flex justify-center">
+          <button
+            onClick={handleToggleRead}
+            className={`w-2 h-2 rounded-full transition-all duration-200 ${
+              article.isRead
+                ? 'bg-transparent hover:bg-gray-300 border border-transparent hover:border-gray-400'
+                : 'bg-unread'
+            }`}
+            title={article.isRead ? 'Mark as unread' : 'Mark as read'}
+          />
         </div>
 
         {/* Feed favicon + name */}
