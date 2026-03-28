@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, type MutableRefObject, type RefObject } from 'react';
 import {
   Search,
   CheckCheck,
@@ -9,7 +9,7 @@ import {
   PanelLeftOpen,
   MoreHorizontal,
 } from 'lucide-react';
-import { useArticles, useMarkAllRead } from '../hooks/useArticles';
+import { useArticles, useMarkAllRead, useMarkArticleRead, useToggleArticleSaved } from '../hooks/useArticles';
 import ArticleRow from './ArticleRow';
 import type { ViewMode } from './Layout';
 
@@ -17,9 +17,33 @@ interface ArticleListProps {
   view: { mode: ViewMode; feedId?: string; folderId?: string; title: string };
   sidebarCollapsed: boolean;
   onExpandSidebar: () => void;
+  focusedIndex: number;
+  searchInputRef: RefObject<HTMLInputElement | null>;
+  refetchRef: MutableRefObject<(() => void) | null>;
+  markAllReadRef: MutableRefObject<(() => void) | null>;
+  toggleArticleRef: MutableRefObject<((index: number) => void) | null>;
+  openArticleExternalRef: MutableRefObject<((index: number) => void) | null>;
+  toggleArticleReadRef: MutableRefObject<((index: number) => void) | null>;
+  toggleArticleSavedRef: MutableRefObject<((index: number) => void) | null>;
+  onArticleCountChange: (count: number) => void;
+  onFocusArticle: (index: number) => void;
 }
 
-export default function ArticleList({ view, sidebarCollapsed, onExpandSidebar }: ArticleListProps) {
+export default function ArticleList({
+  view,
+  sidebarCollapsed,
+  onExpandSidebar,
+  focusedIndex,
+  searchInputRef,
+  refetchRef,
+  markAllReadRef,
+  toggleArticleRef,
+  openArticleExternalRef,
+  toggleArticleReadRef,
+  toggleArticleSavedRef,
+  onArticleCountChange,
+  onFocusArticle,
+}: ArticleListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedArticles, setExpandedArticles] = useState<Set<string>>(new Set());
   const [allExpanded, setAllExpanded] = useState(false);
@@ -36,7 +60,14 @@ export default function ArticleList({ view, sidebarCollapsed, onExpandSidebar }:
 
   const { data, isLoading, refetch } = useArticles(queryParams);
   const markAllReadMutation = useMarkAllRead();
+  const markReadMutation = useMarkArticleRead();
+  const toggleSavedMutation = useToggleArticleSaved();
   const articles = data?.articles || [];
+
+  // Report article count to parent for keyboard navigation bounds
+  useEffect(() => {
+    onArticleCountChange(articles.length);
+  }, [articles.length, onArticleCountChange]);
 
   const toggleArticle = (id: string) => {
     setExpandedArticles((prev) => {
@@ -62,6 +93,34 @@ export default function ArticleList({ view, sidebarCollapsed, onExpandSidebar }:
     if (view.mode === 'folder' && view.folderId) params.folderId = view.folderId;
     markAllReadMutation.mutate(params);
   };
+
+  // ─── Wire up refs for keyboard shortcut callbacks ─────────────────
+  useEffect(() => {
+    refetchRef.current = () => refetch();
+    markAllReadRef.current = handleMarkAllRead;
+    toggleArticleRef.current = (index: number) => {
+      const article = articles[index];
+      if (article) toggleArticle(article.id);
+    };
+    openArticleExternalRef.current = (index: number) => {
+      const article = articles[index];
+      if (article?.url) {
+        window.open(article.url, '_blank', 'noopener,noreferrer');
+      }
+    };
+    toggleArticleReadRef.current = (index: number) => {
+      const article = articles[index];
+      if (article) {
+        markReadMutation.mutate({ id: article.id, isRead: !article.isRead });
+      }
+    };
+    toggleArticleSavedRef.current = (index: number) => {
+      const article = articles[index];
+      if (article) {
+        toggleSavedMutation.mutate({ id: article.id, isSaved: !article.isSaved });
+      }
+    };
+  });
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -99,6 +158,7 @@ export default function ArticleList({ view, sidebarCollapsed, onExpandSidebar }:
         <div className="relative max-w-xs">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Search in articles"
             value={searchQuery}
@@ -156,12 +216,16 @@ export default function ArticleList({ view, sidebarCollapsed, onExpandSidebar }:
             </p>
           </div>
         ) : (
-          articles.map((article) => (
+          articles.map((article, index) => (
             <ArticleRow
               key={article.id}
               article={article}
               isExpanded={expandedArticles.has(article.id)}
-              onToggle={() => toggleArticle(article.id)}
+              onToggle={() => {
+                onFocusArticle(index);
+                toggleArticle(article.id);
+              }}
+              isFocused={index === focusedIndex}
             />
           ))
         )}

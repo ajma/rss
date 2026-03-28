@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Bookmark, BookmarkCheck, MoreHorizontal, Loader2 } from 'lucide-react';
 import { useArticle, useMarkArticleRead, useToggleArticleSaved } from '../hooks/useArticles';
 import type { Article } from '../api/articles';
@@ -7,6 +7,7 @@ interface ArticleRowProps {
   article: Article;
   isExpanded: boolean;
   onToggle: () => void;
+  isFocused?: boolean;
 }
 
 /**
@@ -29,7 +30,8 @@ function timeAgo(dateStr: string | null): string {
   return `${diffMonths}mo`;
 }
 
-export default function ArticleRow({ article, isExpanded, onToggle }: ArticleRowProps) {
+export default function ArticleRow({ article, isExpanded, onToggle, isFocused = false }: ArticleRowProps) {
+  const rowRef = useRef<HTMLDivElement>(null);
   const [showContent, setShowContent] = useState(false);
   const markReadMutation = useMarkArticleRead();
   const toggleSavedMutation = useToggleArticleSaved();
@@ -50,6 +52,13 @@ export default function ArticleRow({ article, isExpanded, onToggle }: ArticleRow
     }
   }, [isExpanded]);
 
+  // Auto-scroll focused row into view
+  useEffect(() => {
+    if (isFocused && rowRef.current) {
+      rowRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [isFocused]);
+
   const handleToggleSaved = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleSavedMutation.mutate({ id: article.id, isSaved: !article.isSaved });
@@ -64,8 +73,13 @@ export default function ArticleRow({ article, isExpanded, onToggle }: ArticleRow
 
   return (
     <div
+      ref={rowRef}
       className={`border-b border-gray-100 transition-colors ${
-        isExpanded ? 'bg-gray-50' : 'hover:bg-gray-50'
+        isFocused
+          ? 'ring-2 ring-inset ring-accent-blue/50 bg-blue-50/40'
+          : isExpanded
+            ? 'bg-gray-50'
+            : 'hover:bg-gray-50'
       }`}
     >
       {/* Collapsed row */}
