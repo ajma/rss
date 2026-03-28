@@ -76,6 +76,13 @@ export default function ArticleRow({ article, isExpanded, onToggle, isFocused = 
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onToggle();
+    }
+  };
+
   return (
     <div
       ref={rowRef}
@@ -87,10 +94,13 @@ export default function ArticleRow({ article, isExpanded, onToggle, isFocused = 
             : 'hover:bg-gray-50'
       }`}
     >
-      {/* Collapsed row */}
-      <button
+      {/* Collapsed row (using div to avoid nested buttons) */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onToggle}
-        className="flex items-center w-full text-left px-4 py-2.5 gap-3 group"
+        onKeyDown={handleKeyDown}
+        className="flex items-center w-full text-left px-4 py-2.5 gap-3 group cursor-pointer select-none focus:outline-none"
       >
         {/* Unread indicator */}
         <div className="w-4 shrink-0 flex justify-center">
@@ -171,7 +181,7 @@ export default function ArticleRow({ article, isExpanded, onToggle, isFocused = 
             <MoreHorizontal size={14} />
           </button>
         </div>
-      </button>
+      </div>
 
       {/* Expanded content */}
       {isExpanded && (
