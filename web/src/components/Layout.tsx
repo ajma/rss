@@ -33,10 +33,11 @@ export default function Layout() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const refetchRef = useRef<(() => void) | null>(null);
   const markAllReadRef = useRef<(() => void) | null>(null);
-  const toggleArticleRef = useRef<((index: number) => void) | null>(null);
   const openArticleExternalRef = useRef<((index: number) => void) | null>(null);
   const toggleArticleReadRef = useRef<((index: number) => void) | null>(null);
   const toggleArticleSavedRef = useRef<((index: number) => void) | null>(null);
+  const navigateArticleRef = useRef<((direction: 'next' | 'prev') => void) | null>(null);
+  const toggleExpandedRef = useRef<(() => void) | null>(null);
 
   const handleSelectFeed = (feedId: string, title: string) => {
     setView({ mode: 'feed', feedId, title });
@@ -70,17 +71,9 @@ export default function Layout() {
           setShowAddFeed(false);
           setShowHelp(false);
         },
-        nextArticle: () =>
-          setFocusedIndex((prev) => {
-            const max = articleCountRef.current - 1;
-            if (max < 0) return -1;
-            return prev < max ? prev + 1 : max;
-          }),
-        prevArticle: () =>
-          setFocusedIndex((prev) => (prev > 0 ? prev - 1 : 0)),
-        toggleArticle: () => {
-          if (focusedIndex >= 0) toggleArticleRef.current?.(focusedIndex);
-        },
+        nextArticle: () => navigateArticleRef.current?.('next'),
+        prevArticle: () => navigateArticleRef.current?.('prev'),
+        toggleArticle: () => toggleExpandedRef.current?.(),
         openArticleExternal: () => {
           if (focusedIndex >= 0) openArticleExternalRef.current?.(focusedIndex);
         },
@@ -140,10 +133,11 @@ export default function Layout() {
           searchInputRef={searchInputRef}
           refetchRef={refetchRef}
           markAllReadRef={markAllReadRef}
-          toggleArticleRef={toggleArticleRef}
           openArticleExternalRef={openArticleExternalRef}
           toggleArticleReadRef={toggleArticleReadRef}
           toggleArticleSavedRef={toggleArticleSavedRef}
+          navigateArticleRef={navigateArticleRef}
+          toggleExpandedRef={toggleExpandedRef}
           onArticleCountChange={setArticleCount}
           onFocusArticle={setFocusedIndex}
         />

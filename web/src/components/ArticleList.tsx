@@ -2,8 +2,6 @@ import { useState, useMemo, useEffect, type MutableRefObject, type RefObject } f
 import {
   Search,
   CheckCheck,
-  ChevronsDownUp,
-  ChevronsUpDown,
   Undo2,
   ChevronDown,
   PanelLeftOpen,
@@ -21,10 +19,11 @@ interface ArticleListProps {
   searchInputRef: RefObject<HTMLInputElement | null>;
   refetchRef: MutableRefObject<(() => void) | null>;
   markAllReadRef: MutableRefObject<(() => void) | null>;
-  toggleArticleRef: MutableRefObject<((index: number) => void) | null>;
   openArticleExternalRef: MutableRefObject<((index: number) => void) | null>;
   toggleArticleReadRef: MutableRefObject<((index: number) => void) | null>;
   toggleArticleSavedRef: MutableRefObject<((index: number) => void) | null>;
+  navigateArticleRef: MutableRefObject<((direction: 'next' | 'prev') => void) | null>;
+  toggleExpandedRef: MutableRefObject<(() => void) | null>;
   onArticleCountChange: (count: number) => void;
   onFocusArticle: (index: number) => void;
 }
@@ -37,16 +36,16 @@ export default function ArticleList({
   searchInputRef,
   refetchRef,
   markAllReadRef,
-  toggleArticleRef,
   openArticleExternalRef,
   toggleArticleReadRef,
   toggleArticleSavedRef,
+  navigateArticleRef,
+  toggleExpandedRef,
   onArticleCountChange,
   onFocusArticle,
 }: ArticleListProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedArticles, setExpandedArticles] = useState<Set<string>>(new Set());
-  const [allExpanded, setAllExpanded] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(-1);
 
   // Build query params based on view mode
   const queryParams = useMemo(() => {
@@ -69,24 +68,6 @@ export default function ArticleList({
     onArticleCountChange(articles.length);
   }, [articles.length, onArticleCountChange]);
 
-  const toggleArticle = (id: string) => {
-    setExpandedArticles((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
-
-  const expandAll = () => {
-    setExpandedArticles(new Set(articles.map((a) => a.id)));
-    setAllExpanded(true);
-  };
-
-  const collapseAll = () => {
-    setExpandedArticles(new Set());
-    setAllExpanded(false);
-  };
-
   const handleMarkAllRead = () => {
     const params: any = {};
     if (view.mode === 'feed' && view.feedId) params.feedId = view.feedId;
@@ -98,10 +79,6 @@ export default function ArticleList({
   useEffect(() => {
     refetchRef.current = () => refetch();
     markAllReadRef.current = handleMarkAllRead;
-    toggleArticleRef.current = (index: number) => {
-      const article = articles[index];
-      if (article) toggleArticle(article.id);
-    };
     openArticleExternalRef.current = (index: number) => {
       const article = articles[index];
       if (article?.url) {
@@ -119,6 +96,20 @@ export default function ArticleList({
       if (article) {
         toggleSavedMutation.mutate({ id: article.id, isSaved: !article.isSaved });
       }
+    };
+    toggleExpandedRef.current = () => {
+      setExpandedIndex((prev) => (prev >= 0 ? -1 : focusedIndex));
+    };
+    navigateArticleRef.current = (direction: 'next' | 'prev') => {
+      const max = articles.length - 1;
+      if (max < 0) return;
+      const newIndex =
+        direction === 'next'
+          ? Math.min(focusedIndex + 1, max)
+          : Math.max(focusedIndex <= 0 ? 0 : focusedIndex - 1, 0);
+      if (newIndex === focusedIndex && focusedIndex >= 0) return;
+      onFocusArticle(newIndex);
+      setExpandedIndex(newIndex);
     };
   });
 
@@ -184,13 +175,6 @@ export default function ArticleList({
             <CheckCheck size={16} />
           </button>
           <button
-            onClick={allExpanded ? collapseAll : expandAll}
-            title={allExpanded ? 'Collapse all' : 'Expand all'}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            {allExpanded ? <ChevronsDownUp size={16} /> : <ChevronsUpDown size={16} />}
-          </button>
-          <button
             title="More options"
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
@@ -220,12 +204,12 @@ export default function ArticleList({
             <ArticleRow
               key={article.id}
               article={article}
-              isExpanded={expandedArticles.has(article.id)}
+              isExpanded={index === expandedIndex}
+              isFocused={index === focusedIndex}
               onToggle={() => {
                 onFocusArticle(index);
-                toggleArticle(article.id);
+                setExpandedIndex(expandedIndex === index ? -1 : index);
               }}
-              isFocused={index === focusedIndex}
             />
           ))
         )}

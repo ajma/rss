@@ -6,8 +6,8 @@ import type { Article } from '../api/articles';
 interface ArticleRowProps {
   article: Article;
   isExpanded: boolean;
+  isFocused: boolean;
   onToggle: () => void;
-  isFocused?: boolean;
 }
 
 /**
@@ -30,7 +30,7 @@ function timeAgo(dateStr: string | null): string {
   return `${diffMonths}mo`;
 }
 
-export default function ArticleRow({ article, isExpanded, onToggle, isFocused = false }: ArticleRowProps) {
+export default function ArticleRow({ article, isExpanded, isFocused, onToggle }: ArticleRowProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const [showContent, setShowContent] = useState(false);
   const markReadMutation = useMarkArticleRead();
@@ -47,17 +47,14 @@ export default function ArticleRow({ article, isExpanded, onToggle, isFocused = 
       if (!article.isRead) {
         markReadMutation.mutate({ id: article.id, isRead: true });
       }
+      // Scroll expanded article to the top
+      if (rowRef.current) {
+        rowRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
     } else {
       setShowContent(false);
     }
   }, [isExpanded]);
-
-  // Auto-scroll focused row into view
-  useEffect(() => {
-    if (isFocused && rowRef.current) {
-      rowRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-  }, [isFocused]);
 
   const handleToggleRead = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -87,11 +84,7 @@ export default function ArticleRow({ article, isExpanded, onToggle, isFocused = 
     <div
       ref={rowRef}
       className={`border-b border-gray-100 transition-colors ${
-        isFocused
-          ? 'ring-2 ring-inset ring-accent-blue/50 bg-blue-50/40'
-          : isExpanded
-            ? 'bg-gray-50'
-            : 'hover:bg-gray-50'
+        isFocused || isExpanded ? 'bg-gray-50' : 'hover:bg-gray-50'
       }`}
     >
       {/* Collapsed row (using div to avoid nested buttons) */}
