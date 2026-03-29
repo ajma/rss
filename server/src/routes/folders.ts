@@ -22,7 +22,15 @@ foldersRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> =>
           include: {
             feed: {
               include: {
-                articles: { select: { id: true } },
+                _count: {
+                  select: { articles: true },
+                },
+                articles: {
+                  where: {
+                    userArticles: { some: { userId, isRead: true } },
+                  },
+                  select: { id: true },
+                },
               },
             },
           },
@@ -31,31 +39,26 @@ foldersRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> =>
       orderBy: { order: 'asc' },
     });
 
-    // Get read article IDs
-    const readArticles = await prisma.userArticle.findMany({
-      where: { userId, isRead: true },
-      select: { articleId: true },
+    const result = folders.map((folder) => {
+      const feeds = folder.subscriptions.map((sub) => {
+        const unreadCount = sub.feed._count.articles - sub.feed.articles.length;
+        return {
+          id: sub.id,
+          feedId: sub.feed.id,
+          title: sub.customTitle || sub.feed.title,
+          url: sub.feed.url,
+          faviconUrl: sub.feed.faviconUrl,
+          unreadCount,
+        };
+      });
+      return {
+        id: folder.id,
+        name: folder.name,
+        order: folder.order,
+        feeds,
+        unreadCount: feeds.reduce((sum, f) => sum + f.unreadCount, 0),
+      };
     });
-    const readArticleIds = new Set(readArticles.map((ua) => ua.articleId));
-
-    const result = folders.map((folder) => ({
-      id: folder.id,
-      name: folder.name,
-      order: folder.order,
-      feeds: folder.subscriptions.map((sub) => ({
-        id: sub.id,
-        feedId: sub.feed.id,
-        title: sub.customTitle || sub.feed.title,
-        url: sub.feed.url,
-        faviconUrl: sub.feed.faviconUrl,
-        unreadCount: sub.feed.articles.filter((a) => !readArticleIds.has(a.id)).length,
-      })),
-      unreadCount: folder.subscriptions.reduce(
-        (sum, sub) =>
-          sum + sub.feed.articles.filter((a) => !readArticleIds.has(a.id)).length,
-        0
-      ),
-    }));
 
     res.json({ folders: result });
   } catch (error) {

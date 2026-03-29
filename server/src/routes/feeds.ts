@@ -24,7 +24,13 @@ feedsRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
       include: {
         feed: {
           include: {
+            _count: {
+              select: { articles: true },
+            },
             articles: {
+              where: {
+                userArticles: { some: { userId, isRead: true } },
+              },
               select: { id: true },
             },
           },
@@ -34,18 +40,11 @@ feedsRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
       orderBy: { createdAt: 'asc' },
     });
 
-    // Get read article IDs for this user
-    const readArticles = await prisma.userArticle.findMany({
-      where: { userId, isRead: true },
-      select: { articleId: true },
-    });
-    const readArticleIds = new Set(readArticles.map((ua) => ua.articleId));
-
     // Build response with unread counts
     const result = subscriptions.map((sub) => {
-      const unreadCount = sub.feed.articles.filter(
-        (a) => !readArticleIds.has(a.id)
-      ).length;
+      const totalArticles = sub.feed._count.articles;
+      const readCount = sub.feed.articles.length;
+      const unreadCount = totalArticles - readCount;
 
       return {
         id: sub.id,

@@ -7,6 +7,8 @@ const REFRESH_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
  * Refreshes all feeds by fetching new articles.
  * Called periodically by the feed refresher.
  */
+const CONCURRENCY_LIMIT = 5;
+
 async function refreshAllFeeds(): Promise<void> {
   try {
     const feeds = await prisma.feed.findMany({
@@ -15,10 +17,21 @@ async function refreshAllFeeds(): Promise<void> {
 
     console.log(`Refreshing ${feeds.length} feeds...`);
 
-    for (const feed of feeds) {
-      const newCount = await fetchAndStoreArticles(feed.id, feed.url);
-      if (newCount > 0) {
-        console.log(`  ${feed.title}: ${newCount} new articles`);
+    // Process feeds in batches to limit concurrency
+    for (let i = 0; i < feeds.length; i += CONCURRENCY_LIMIT) {
+      const batch = feeds.slice(i, i + CONCURRENCY_LIMIT);
+      const results = await Promise.allSettled(
+        batch.map(async (feed) => {
+          const newCount = await fetchAndStoreArticles(feed.id, feed.url);
+          if (newCount > 0) {
+            console.log(`  ${feed.title}: ${newCount} new articles`);
+          }
+        })
+      );
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          console.error('Feed refresh failed:', result.reason);
+        }
       }
     }
 

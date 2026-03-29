@@ -12,7 +12,11 @@ export const authRouter = Router();
  * dotenv has loaded before we access process.env.
  */
 function getJwtSecret(): string {
-  return process.env.JWT_SECRET || 'dev-secret';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return secret;
 }
 
 function generateToken(userId: string): string {
@@ -130,16 +134,32 @@ authRouter.get('/me', authMiddleware, async (req: AuthRequest, res: Response): P
 
 /**
  * POST /api/auth/google
- * Handle Google OAuth login (exchanges Google token for JWT)
- * In a full implementation, this would use passport-google-oauth20.
- * For now, we accept googleId + email + name from the frontend Google Sign-In.
+ * Handle Google OAuth login. Verifies the Google ID token server-side
+ * before trusting the user's identity.
  */
 authRouter.post('/google', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { googleId, email, name } = req.body;
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      res.status(400).json({ error: 'Missing idToken' });
+      return;
+    }
+
+    // Verify the Google ID token server-side
+    const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
+    if (!googleRes.ok) {
+      res.status(401).json({ error: 'Invalid Google ID token' });
+      return;
+    }
+
+    const payload = await googleRes.json() as { sub: string; email: string; name?: string; email_verified?: string };
+    const googleId = payload.sub;
+    const email = payload.email;
+    const name = payload.name;
 
     if (!googleId || !email) {
-      res.status(400).json({ error: 'Missing googleId or email' });
+      res.status(401).json({ error: 'Invalid token payload' });
       return;
     }
 
@@ -150,13 +170,11 @@ authRouter.post('/google', async (req: Request, res: Response): Promise<void> =>
       // Check if email already exists (link accounts)
       user = await prisma.user.findUnique({ where: { email } });
       if (user) {
-        // Link Google account to existing user
         user = await prisma.user.update({
           where: { id: user.id },
           data: { googleId },
         });
       } else {
-        // Create new user
         user = await prisma.user.create({
           data: { googleId, email, name: name || email.split('@')[0] },
         });

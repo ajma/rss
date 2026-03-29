@@ -1,5 +1,6 @@
 import { Readability } from '@mozilla/readability';
 import { parseHTML } from 'linkedom';
+import { validateExternalUrl } from '../lib/urlValidation';
 
 /**
  * Fetches the HTML from an article URL and extracts the main article
@@ -9,6 +10,7 @@ import { parseHTML } from 'linkedom';
  */
 export async function extractArticleContent(url: string): Promise<string | null> {
   try {
+    validateExternalUrl(url);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     console.log(`Extracting content from ${url}`);

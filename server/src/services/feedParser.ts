@@ -1,5 +1,6 @@
 import Parser from 'rss-parser';
 import prisma from '../lib/prisma';
+import { validateExternalUrl } from '../lib/urlValidation';
 
 const parser = new Parser({
   timeout: 10000,
@@ -21,6 +22,7 @@ function createSnippet(html: string | undefined, maxLength = 200): string {
  * Fetches and parses an RSS feed from a URL, returning the parsed feed data.
  */
 export async function parseFeed(url: string) {
+  validateExternalUrl(url);
   const feed = await parser.parseURL(url);
   return feed;
 }

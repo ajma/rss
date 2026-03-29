@@ -61,6 +61,13 @@ articlesRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> =
       ];
     }
 
+    // Filter saved articles at the DB level
+    if (saved === 'true') {
+      articleWhere.userArticles = {
+        some: { userId, isSaved: true },
+      };
+    }
+
     // Get total count
     const total = await prisma.article.count({ where: articleWhere });
 
@@ -81,8 +88,7 @@ articlesRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> =
       take: limitNum,
     });
 
-    // Filter saved articles if requested
-    let result = articles.map((article) => {
+    const result = articles.map((article) => {
       const userArticle = article.userArticles[0];
       return {
         id: article.id,
@@ -98,10 +104,6 @@ articlesRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> =
         isSaved: userArticle?.isSaved || false,
       };
     });
-
-    if (saved === 'true') {
-      result = result.filter((a) => a.isSaved);
-    }
 
     res.json({
       articles: result,
@@ -263,23 +265,39 @@ articlesRouter.post('/mark-all-read', async (req: AuthRequest, res: Response): P
     });
     const feedIds = subscriptions.map((s) => s.feedId);
 
-    // Get all unread articles from these feeds
-    const articles = await prisma.article.findMany({
-      where: { feedId: { in: feedIds } },
+    // Update existing UserArticle records to read
+    const now = new Date();
+    await prisma.userArticle.updateMany({
+      where: {
+        userId,
+        article: { feedId: { in: feedIds } },
+        isRead: false,
+      },
+      data: { isRead: true, readAt: now },
+    });
+
+    // Create UserArticle records for articles that don't have one yet
+    const articlesWithoutRecord = await prisma.article.findMany({
+      where: {
+        feedId: { in: feedIds },
+        userArticles: { none: { userId } },
+      },
       select: { id: true },
     });
 
-    // Upsert UserArticle records to mark as read
-    const now = new Date();
-    for (const article of articles) {
-      await prisma.userArticle.upsert({
-        where: { userId_articleId: { userId, articleId: article.id } },
-        create: { userId, articleId: article.id, isRead: true, readAt: now },
-        update: { isRead: true, readAt: now },
+    if (articlesWithoutRecord.length > 0) {
+      await prisma.userArticle.createMany({
+        data: articlesWithoutRecord.map((a) => ({
+          userId,
+          articleId: a.id,
+          isRead: true,
+          readAt: now,
+        })),
       });
     }
 
-    res.json({ message: `Marked ${articles.length} articles as read` });
+    const totalMarked = articlesWithoutRecord.length;
+    res.json({ message: `Marked articles as read` });
   } catch (error) {
     console.error('Mark all read error:', error);
     res.status(500).json({ error: 'Internal server error' });
