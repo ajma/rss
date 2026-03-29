@@ -93,7 +93,7 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
         tabIndex={0}
         onClick={onToggle}
         onKeyDown={handleKeyDown}
-        className="flex items-center w-full text-left px-4 py-2.5 gap-3 group cursor-pointer select-none focus:outline-none"
+        className="flex items-center w-full text-left px-4 py-1.5 gap-3 group cursor-pointer select-none focus:outline-none"
       >
         {/* Unread indicator */}
         <div className="w-4 shrink-0 flex justify-center">
@@ -132,7 +132,7 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
         {/* Article title + snippet */}
         <div className="flex-1 min-w-0 flex items-baseline gap-2">
           <span
-            className={`truncate ${
+            className={`truncate text-sm ${
               article.isRead
                 ? 'text-gray-500 font-normal'
                 : 'text-gray-900 font-semibold'
