@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { z } from 'zod';
 
 // Mock Prisma client
 vi.mock('../lib/prisma', () => ({
@@ -30,7 +31,6 @@ describe('Feeds', () => {
 
   describe('Feed URL validation', () => {
     it('should accept valid feed URLs', () => {
-      const { z } = require('zod');
       const schema = z.object({ url: z.string().url() });
 
       expect(schema.safeParse({ url: 'https://example.com/rss' }).success).toBe(true);
@@ -38,7 +38,6 @@ describe('Feeds', () => {
     });
 
     it('should reject invalid feed URLs', () => {
-      const { z } = require('zod');
       const schema = z.object({ url: z.string().url() });
 
       expect(schema.safeParse({ url: 'not-a-url' }).success).toBe(false);

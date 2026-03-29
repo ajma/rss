@@ -11,7 +11,7 @@ A modern, full-stack RSS reader web application. Subscribe to RSS feeds, organiz
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20.19+
 - npm 9+
 
 ## Setup
@@ -31,6 +31,7 @@ A modern, full-stack RSS reader web application. Subscribe to RSS feeds, organiz
 
 3. **Set up the database**
    ```bash
+   npm run db:generate          # Generate Prisma client
    npm run db:push              # Create database tables
    npm run db:seed              # Seed with demo data
    ```
@@ -57,6 +58,8 @@ rss/
 │   ├── prisma/
 │   │   ├── schema.prisma   # Database schema
 │   │   └── seed.ts         # Seed script
+│   ├── prisma.config.ts    # Prisma v7 config (datasource URL)
+│   ├── generated/          # Generated Prisma client (do not edit)
 │   └── src/
 │       ├── index.ts        # App entry point
 │       ├── middleware/      # Auth middleware
@@ -94,6 +97,7 @@ rss/
 | `npm run dev` | Start both servers in development mode |
 | `npm test` | Run all tests |
 | `npm run build` | Build for production |
+| `npm run db:generate` | Generate Prisma client (run after schema changes) |
 | `npm run db:push` | Push Prisma schema to database |
 | `npm run db:seed` | Seed database with demo data |
 
@@ -104,8 +108,19 @@ rss/
    datasource db {
    -  provider = "sqlite"
    +  provider = "postgresql"
-      url      = env("DATABASE_URL")
    }
    ```
 2. Update `DATABASE_URL` in `.env` to your PostgreSQL connection string.
-3. Run `npm run db:push` to apply.
+3. Swap the driver adapter in `server/src/lib/prisma.ts`:
+   ```bash
+   npm install @prisma/adapter-pg pg
+   npm uninstall @prisma/adapter-better-sqlite3 better-sqlite3
+   ```
+   ```diff
+   - import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+   + import { PrismaPg } from '@prisma/adapter-pg';
+
+   - const adapter = new PrismaBetterSqlite3({ url: ... });
+   + const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+   ```
+4. Run `npx prisma generate && npm run db:push` to apply.
