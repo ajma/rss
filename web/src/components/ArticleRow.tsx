@@ -95,38 +95,55 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
         onKeyDown={handleKeyDown}
         className="flex items-center w-full text-left px-4 py-1.5 gap-3 group cursor-pointer select-none focus:outline-none"
       >
-        {/* Unread indicator */}
-        <div className="w-4 shrink-0 flex justify-center">
-          <button
-            onClick={handleToggleRead}
-            className={`w-2 h-2 rounded-full transition-all duration-200 ${
-              article.isRead
-                ? 'bg-transparent hover:bg-gray-300 border border-transparent hover:border-gray-400'
-                : 'bg-unread'
-            }`}
-            title={article.isRead ? 'Mark as unread' : 'Mark as read'}
-          />
-        </div>
+        {/* Status + Feed info group */}
+        <div className="flex items-center gap-3 w-44 shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleToggleRead}
+              className="group/unread p-3 -m-3 transition-colors focus:outline-none"
+              title={article.isRead ? 'Mark as unread' : 'Mark as read'}
+            >
+              <div
+                className={`w-2 h-2 rounded-full transition-all duration-200 transform group-hover/unread:scale-150 ${
+                  article.isRead
+                    ? 'bg-gray-200 border border-gray-300 group-hover/unread:bg-gray-300'
+                    : 'bg-unread shadow-[0_0_8px_rgba(74,158,255,0.2)]'
+                }`}
+              />
+            </button>
+            
+            <button
+              onClick={handleToggleSaved}
+              className={`p-1 rounded-md transition-colors focus:outline-none ${
+                article.isSaved 
+                  ? 'text-accent-orange' 
+                  : 'text-gray-300 hover:text-gray-400'
+              }`}
+              title={article.isSaved ? 'Unsave' : 'Save'}
+            >
+              {article.isSaved ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
+            </button>
+          </div>
 
-        {/* Feed favicon + name */}
-        <div className="flex items-center gap-2 w-32 shrink-0">
-          {article.feedFaviconUrl ? (
-            <img
-              src={article.feedFaviconUrl}
-              alt=""
-              className="w-4 h-4 rounded"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          ) : (
-            <div className="w-4 h-4 rounded bg-accent-orange/20 flex items-center justify-center">
-              <span className="text-[8px] text-accent-orange font-bold">
-                {article.feedTitle.charAt(0)}
-              </span>
-            </div>
-          )}
-          <span className="text-xs text-gray-500 truncate">{article.feedTitle}</span>
+          <div className="flex items-center gap-2 min-w-0">
+            {article.feedFaviconUrl ? (
+              <img
+                src={article.feedFaviconUrl}
+                alt=""
+                className="w-4 h-4 rounded shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="w-4 h-4 rounded bg-accent-orange/20 flex items-center justify-center shrink-0">
+                <span className="text-[8px] text-accent-orange font-bold">
+                  {article.feedTitle.charAt(0)}
+                </span>
+              </div>
+            )}
+            <span className="text-xs text-gray-500 truncate">{article.feedTitle}</span>
+          </div>
         </div>
 
         {/* Article title + snippet */}
@@ -152,13 +169,6 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
 
         {/* Row actions (visible on hover) */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-          <button
-            onClick={handleToggleSaved}
-            title={article.isSaved ? 'Unsave' : 'Save'}
-            className="p-1 text-gray-400 hover:text-accent-blue rounded transition-colors"
-          >
-            {article.isSaved ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
-          </button>
           <button
             onClick={handleOpenExternal}
             title="Open in new tab"
