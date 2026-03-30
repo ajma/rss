@@ -98,6 +98,36 @@ describe('matchesShortcut', () => {
   it('matches Space key', () => {
     expect(matchesShortcut(fakeEvent({ key: ' ' }), shortcut({ key: ' ' }))).toBe(true);
   });
+
+  it('matches Shift+1 producing "!" for filter shortcuts', () => {
+    const e = fakeEvent({ key: '!', shiftKey: true });
+    const s = shortcut({ key: '!', shift: true });
+    expect(matchesShortcut(e, s)).toBe(true);
+  });
+
+  it('matches Shift+2 producing "@" for filter shortcuts', () => {
+    const e = fakeEvent({ key: '@', shiftKey: true });
+    const s = shortcut({ key: '@', shift: true });
+    expect(matchesShortcut(e, s)).toBe(true);
+  });
+
+  it('matches Shift+3 producing "#" for filter shortcuts', () => {
+    const e = fakeEvent({ key: '#', shiftKey: true });
+    const s = shortcut({ key: '#', shift: true });
+    expect(matchesShortcut(e, s)).toBe(true);
+  });
+
+  it('matches Shift+4 producing "$" for filter shortcuts', () => {
+    const e = fakeEvent({ key: '$', shiftKey: true });
+    const s = shortcut({ key: '$', shift: true });
+    expect(matchesShortcut(e, s)).toBe(true);
+  });
+
+  it('does NOT match "!" without Shift held', () => {
+    const e = fakeEvent({ key: '!', shiftKey: false });
+    const s = shortcut({ key: '!', shift: true });
+    expect(matchesShortcut(e, s)).toBe(false);
+  });
 });
 
 // ────────────────────────────────────────────────────────────────────

@@ -66,4 +66,43 @@ describe('ArticleList Logic', () => {
       expect(params).toEqual({ limit: 100, search: 'test search' });
     });
   });
+
+  describe('Article filter query params', () => {
+    type ArticleFilter = 'all' | 'unread' | 'saved' | 'read';
+
+    function buildFilterParams(
+      viewMode: string,
+      articleFilter: ArticleFilter,
+    ): Record<string, any> {
+      const params: Record<string, any> = { limit: 100 };
+      if (viewMode === 'saved' || articleFilter === 'saved') params.saved = true;
+      if (articleFilter === 'unread') params.readFilter = 'unread';
+      if (articleFilter === 'read') params.readFilter = 'read';
+      return params;
+    }
+
+    it('should not add filter params when filter is "all"', () => {
+      expect(buildFilterParams('all', 'all')).toEqual({ limit: 100 });
+    });
+
+    it('should add readFilter=unread when filter is "unread"', () => {
+      expect(buildFilterParams('all', 'unread')).toEqual({ limit: 100, readFilter: 'unread' });
+    });
+
+    it('should add readFilter=read when filter is "read"', () => {
+      expect(buildFilterParams('all', 'read')).toEqual({ limit: 100, readFilter: 'read' });
+    });
+
+    it('should add saved=true when filter is "saved"', () => {
+      expect(buildFilterParams('all', 'saved')).toEqual({ limit: 100, saved: true });
+    });
+
+    it('should add saved=true when view mode is "saved" regardless of filter', () => {
+      expect(buildFilterParams('saved', 'all')).toEqual({ limit: 100, saved: true });
+    });
+
+    it('should add saved=true from both view mode and filter', () => {
+      expect(buildFilterParams('saved', 'saved')).toEqual({ limit: 100, saved: true });
+    });
+  });
 });
