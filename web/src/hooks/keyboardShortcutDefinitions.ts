@@ -75,7 +75,7 @@ export function buildKeyboardShortcuts(actions: ShortcutActions): KeyboardShortc
       handler: actions.nextArticle,
     },
     {
-      key: ' ',
+      key: 'ArrowRight',
       group: 'Article navigation',
       label: 'Next article',
       handler: actions.nextArticle,
@@ -87,8 +87,7 @@ export function buildKeyboardShortcuts(actions: ShortcutActions): KeyboardShortc
       handler: actions.prevArticle,
     },
     {
-      key: ' ',
-      shift: true,
+      key: 'ArrowLeft',
       group: 'Article navigation',
       label: 'Previous article',
       handler: actions.prevArticle,
