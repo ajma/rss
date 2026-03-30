@@ -106,7 +106,7 @@ export default function Layout() {
   }, [shortcuts]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-surface-secondary">
       {/* Narrow icon sidebar */}
       <IconSidebar
         onAddFeed={() => setShowAddFeed(true)}

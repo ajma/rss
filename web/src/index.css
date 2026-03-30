@@ -2,6 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Theme variables ─────────────────────────────────────────────── */
+:root {
+  /* Sidebar */
+  --sidebar-bg: #f3f4f6;
+  --sidebar-border: #e5e7eb;
+  --sidebar-hover: #e5e7eb;
+  --sidebar-active: #dbeafe;
+  --sidebar-text: #6b7280;
+  --sidebar-text-active: #111827;
+  --icon-bg: #1e293b;
+
+  /* Surfaces */
+  --surface: #ffffff;
+  --surface-secondary: #f9fafb;
+  --surface-tertiary: #f3f4f6;
+  --surface-border: #e5e7eb;
+
+  /* Text */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+
+  /* Misc */
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a1a1a1;
+  --code-bg: #f0f0f0;
+  --blockquote-border: #ddd;
+  --blockquote-text: #666;
+}
+
+.dark {
+  /* Sidebar */
+  --sidebar-bg: #0a0b0c;
+  --sidebar-border: #1a1b1e;
+  --sidebar-hover: #141518;
+  --sidebar-active: #1a1b1e;
+  --sidebar-text: #71717a;
+  --sidebar-text-active: #e4e4e7;
+  --icon-bg: #050506;
+
+  /* Surfaces */
+  --surface: #0d0e10;
+  --surface-secondary: #020203;
+  --surface-tertiary: #141518;
+  --surface-border: #1a1b1e;
+
+  /* Text */
+  --text-primary: #e4e4e7;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #52525b;
+
+  /* Misc */
+  --scrollbar-thumb: #4b5563;
+  --scrollbar-thumb-hover: #6b7280;
+  --code-bg: #263548;
+  --blockquote-border: #4b5563;
+  --blockquote-text: #9ca3af;
+}
+
+/* ─── Base styles ─────────────────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
@@ -12,8 +72,8 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
 }
 
 /* Custom scrollbar */
@@ -24,11 +84,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Article expand animation */
@@ -66,15 +126,15 @@ body {
   font-weight: 600;
 }
 .article-content pre {
-  background: #f0f0f0;
+  background: var(--code-bg);
   border-radius: 4px;
   padding: 12px;
   overflow-x: auto;
   font-size: 0.875rem;
 }
 .article-content blockquote {
-  border-left: 3px solid #ddd;
+  border-left: 3px solid var(--blockquote-border);
   padding-left: 12px;
-  color: #666;
+  color: var(--blockquote-text);
   margin: 8px 0;
 }

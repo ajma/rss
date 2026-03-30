@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -8,16 +9,27 @@ export default {
       },
       colors: {
         sidebar: {
-          dark: '#1a2332',
-          DEFAULT: '#1e2a3a',
-          hover: '#263548',
-          active: '#2d3f52',
-          text: '#8899aa',
-          'text-active': '#ffffff',
+          border: 'var(--sidebar-border)',
+          DEFAULT: 'var(--sidebar-bg)',
+          hover: 'var(--sidebar-hover)',
+          active: 'var(--sidebar-active)',
+          text: 'var(--sidebar-text)',
+          'text-active': 'var(--sidebar-text-active)',
         },
         icon: {
-          bg: '#1a2332',
+          bg: 'var(--icon-bg)',
           active: '#4a9eff',
+        },
+        surface: {
+          DEFAULT: 'var(--surface)',
+          secondary: 'var(--surface-secondary)',
+          tertiary: 'var(--surface-tertiary)',
+          border: 'var(--surface-border)',
+        },
+        content: {
+          DEFAULT: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          tertiary: 'var(--text-tertiary)',
         },
         accent: {
           blue: '#4a9eff',

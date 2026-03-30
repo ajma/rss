@@ -83,8 +83,8 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
   return (
     <div
       ref={rowRef}
-      className={`border-b border-gray-100 transition-colors ${
-        isFocused || isExpanded ? 'bg-gray-50' : 'hover:bg-gray-50'
+      className={`border-b border-surface-border transition-colors ${
+        isFocused || isExpanded ? 'bg-surface-secondary' : 'hover:bg-surface-secondary'
       }`}
     >
       {/* Collapsed row (using div to avoid nested buttons) */}
@@ -106,18 +106,18 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
               <div
                 className={`w-2 h-2 rounded-full transition-all duration-200 transform group-hover/unread:scale-150 ${
                   article.isRead
-                    ? 'bg-gray-200 border border-gray-300 group-hover/unread:bg-gray-300'
+                    ? 'bg-surface-tertiary border border-surface-border group-hover/unread:bg-content-tertiary'
                     : 'bg-unread shadow-[0_0_8px_rgba(74,158,255,0.2)]'
                 }`}
               />
             </button>
-            
+
             <button
               onClick={handleToggleSaved}
               className={`p-1 rounded-md transition-colors focus:outline-none ${
-                article.isSaved 
-                  ? 'text-accent-orange' 
-                  : 'text-gray-300 hover:text-gray-400'
+                article.isSaved
+                  ? 'text-accent-orange'
+                  : 'text-content-tertiary hover:text-content-secondary'
               }`}
               title={article.isSaved ? 'Unsave' : 'Save'}
             >
@@ -142,7 +142,7 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
                 </span>
               </div>
             )}
-            <span className="text-xs text-gray-500 truncate">{article.feedTitle}</span>
+            <span className="text-xs text-content-secondary truncate">{article.feedTitle}</span>
           </div>
         </div>
 
@@ -151,19 +151,19 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
           <span
             className={`truncate text-sm ${
               article.isRead
-                ? 'text-gray-500 font-normal'
-                : 'text-gray-900 font-semibold'
+                ? 'text-content-secondary font-normal'
+                : 'text-content font-semibold'
             }`}
           >
             {article.title}
           </span>
-          <span className="text-sm text-gray-400 truncate hidden sm:inline">
+          <span className="text-sm text-content-tertiary truncate hidden sm:inline">
             {article.snippet}
           </span>
         </div>
 
         {/* Time ago */}
-        <span className="text-xs text-gray-400 shrink-0 ml-2">
+        <span className="text-xs text-content-tertiary shrink-0 ml-2">
           {timeAgo(article.publishedAt)}
         </span>
 
@@ -172,13 +172,13 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
           <button
             onClick={handleOpenExternal}
             title="Open in new tab"
-            className="p-1 text-gray-400 hover:text-accent-blue rounded transition-colors"
+            className="p-1 text-content-tertiary hover:text-accent-blue rounded transition-colors"
           >
             <ExternalLink size={14} />
           </button>
           <button
             title="More"
-            className="p-1 text-gray-400 hover:text-gray-600 rounded transition-colors"
+            className="p-1 text-content-tertiary hover:text-content-secondary rounded transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             <MoreHorizontal size={14} />
@@ -193,13 +193,13 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
             showContent ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0'
           } overflow-hidden`}
         >
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+          <div className="bg-surface rounded-lg border border-surface-border p-5 shadow-sm">
             {/* Article header */}
             <div className="mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <h2 className="text-xl font-semibold text-content mb-2">
                 {article.title}
               </h2>
-              <div className="flex items-center gap-3 text-sm text-gray-500">
+              <div className="flex items-center gap-3 text-sm text-content-secondary">
                 <span>{article.feedTitle}</span>
                 {article.author && (
                   <>
@@ -239,18 +239,18 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
             {isLoadingContent ? (
               <div className="flex flex-col items-center justify-center py-8 gap-3">
                 <Loader2 size={24} className="animate-spin text-accent-blue" />
-                <span className="text-sm text-gray-400">Fetching full article…</span>
+                <span className="text-sm text-content-tertiary">Fetching full article…</span>
                 <div className="w-full mt-2 space-y-3">
-                  <div className="h-3 bg-gray-200 rounded animate-pulse w-full" />
-                  <div className="h-3 bg-gray-200 rounded animate-pulse w-5/6" />
-                  <div className="h-3 bg-gray-200 rounded animate-pulse w-4/6" />
-                  <div className="h-3 bg-gray-200 rounded animate-pulse w-full" />
-                  <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4" />
+                  <div className="h-3 bg-surface-tertiary rounded animate-pulse w-full" />
+                  <div className="h-3 bg-surface-tertiary rounded animate-pulse w-5/6" />
+                  <div className="h-3 bg-surface-tertiary rounded animate-pulse w-4/6" />
+                  <div className="h-3 bg-surface-tertiary rounded animate-pulse w-full" />
+                  <div className="h-3 bg-surface-tertiary rounded animate-pulse w-3/4" />
                 </div>
               </div>
             ) : (
               <div
-                className="article-content prose prose-sm max-w-none text-gray-700 leading-relaxed"
+                className="article-content prose prose-sm max-w-none text-content-secondary leading-relaxed"
                 dangerouslySetInnerHTML={{
                   __html: fullArticle?.content || article.snippet || '',
                 }}

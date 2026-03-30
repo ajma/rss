@@ -45,27 +45,27 @@ export default function FeedSidebar({
   const rootFeeds = subscriptions.filter((sub) => !sub.folderId);
 
   return (
-    <div className="flex flex-col w-60 bg-sidebar shrink-0 text-sm border-r border-sidebar-dark/50">
+    <div className="flex flex-col w-60 bg-sidebar shrink-0 text-sm border-r border-sidebar-border">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-dark/50">
+      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
         <h2 className="text-sidebar-text-active font-semibold text-base">Feeds</h2>
         <div className="flex items-center gap-1">
           <button
             title="Settings"
-            className="p-1 text-sidebar-text hover:text-white rounded transition-colors"
+            className="p-1 text-sidebar-text hover:text-sidebar-text-active rounded transition-colors"
           >
             <Settings size={14} />
           </button>
           <button
             title="Refresh"
-            className="p-1 text-sidebar-text hover:text-white rounded transition-colors"
+            className="p-1 text-sidebar-text hover:text-sidebar-text-active rounded transition-colors"
           >
             <RefreshCw size={14} />
           </button>
           <button
             title="Collapse sidebar"
             onClick={onCollapse}
-            className="p-1 text-sidebar-text hover:text-white rounded transition-colors"
+            className="p-1 text-sidebar-text hover:text-sidebar-text-active rounded transition-colors"
           >
             <PanelLeftClose size={14} />
           </button>
@@ -115,7 +115,7 @@ export default function FeedSidebar({
             ) : (
               <Rss size={14} className="shrink-0 text-accent-orange" />
             )}
-            <span className="truncate flex-1 text-left">{sub.title}</span>
+            <span className={`truncate flex-1 text-left ${sub.unreadCount > 0 ? 'font-semibold text-sidebar-text-active' : ''}`}>{sub.title}</span>
             {sub.unreadCount > 0 && (
               <span className="text-xs text-sidebar-text">{sub.unreadCount}</span>
             )}
@@ -129,7 +129,7 @@ export default function FeedSidebar({
             <div className="flex items-center">
               <button
                 onClick={() => toggleFolder(folder.id)}
-                className="p-1 ml-1 text-sidebar-text hover:text-white"
+                className="p-1 ml-1 text-sidebar-text hover:text-sidebar-text-active"
               >
                 {expandedFolders.has(folder.id) ? (
                   <ChevronDown size={14} />
@@ -146,7 +146,7 @@ export default function FeedSidebar({
                 }`}
               >
                 <FolderOpen size={14} className="shrink-0 text-accent-orange" />
-                <span className="truncate flex-1 text-left">{folder.name}</span>
+                <span className={`truncate flex-1 text-left ${folder.unreadCount > 0 ? 'font-semibold text-sidebar-text-active' : ''}`}>{folder.name}</span>
                 {folder.unreadCount > 0 && (
                   <span className="text-xs text-sidebar-text">{folder.unreadCount}</span>
                 )}
@@ -177,7 +177,7 @@ export default function FeedSidebar({
                   ) : (
                     <Rss size={14} className="shrink-0 text-accent-orange" />
                   )}
-                  <span className="truncate flex-1 text-left">{feed.title}</span>
+                  <span className={`truncate flex-1 text-left ${feed.unreadCount > 0 ? 'font-semibold text-sidebar-text-active' : ''}`}>{feed.title}</span>
                   {feed.unreadCount > 0 && (
                     <span className="text-xs text-sidebar-text">{feed.unreadCount}</span>
                   )}

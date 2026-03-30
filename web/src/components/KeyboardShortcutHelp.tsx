@@ -62,15 +62,15 @@ export default function KeyboardShortcutHelp({ shortcuts, onClose }: KeyboardSho
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col"
+        className="bg-surface rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">Keyboard shortcuts</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-surface-border">
+          <h2 className="text-lg font-semibold text-content">Keyboard shortcuts</h2>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-1 text-content-tertiary hover:text-content-secondary rounded-lg hover:bg-surface-tertiary transition-colors"
           >
             <X size={20} />
           </button>
@@ -81,14 +81,14 @@ export default function KeyboardShortcutHelp({ shortcuts, onClose }: KeyboardSho
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {Array.from(grouped.entries()).map(([group, items]) => (
               <div key={group}>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-semibold text-content-secondary uppercase tracking-wider mb-3">
                   {group}
                 </h3>
                 <div className="space-y-2">
                   {items.map((s, i) => (
                     <div key={i} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-700">{s.label}</span>
-                      <kbd className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 border border-gray-200 text-xs font-mono text-gray-600 min-w-[2rem] justify-center">
+                      <span className="text-content">{s.label}</span>
+                      <kbd className="inline-flex items-center px-2 py-0.5 rounded bg-surface-tertiary border border-surface-border text-xs font-mono text-content-secondary min-w-[2rem] justify-center">
                         {keyLabel(s)}
                       </kbd>
                     </div>
@@ -100,9 +100,9 @@ export default function KeyboardShortcutHelp({ shortcuts, onClose }: KeyboardSho
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-100 text-center text-xs text-gray-400">
-          Press <kbd className="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 font-mono">H</kbd> or{' '}
-          <kbd className="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 font-mono">?</kbd> to toggle this
+        <div className="px-6 py-3 border-t border-surface-border text-center text-xs text-content-tertiary">
+          Press <kbd className="px-1.5 py-0.5 rounded bg-surface-tertiary border border-surface-border font-mono">H</kbd> or{' '}
+          <kbd className="px-1.5 py-0.5 rounded bg-surface-tertiary border border-surface-border font-mono">?</kbd> to toggle this
           help
         </div>
       </div>

@@ -67,16 +67,16 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="bg-surface rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-surface-border">
           <div className="flex items-center gap-2">
             <Rss size={20} className="text-accent-orange" />
-            <h2 className="text-lg font-semibold text-gray-900">Add Feed</h2>
+            <h2 className="text-lg font-semibold text-content">Add Feed</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-1 text-content-tertiary hover:text-content-secondary rounded-lg hover:bg-surface-tertiary transition-colors"
           >
             <X size={20} />
           </button>
@@ -86,7 +86,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Feed URL */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-secondary mb-1">
               Feed URL
             </label>
             <input
@@ -94,7 +94,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
               value={feedUrl}
               onChange={(e) => setFeedUrl(e.target.value)}
               placeholder="https://example.com/rss"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-colors"
+              className="w-full px-3 py-2 border border-surface-border rounded-lg text-sm bg-surface text-content focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-colors"
               autoFocus
               disabled={isLoading}
             />
@@ -102,7 +102,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
 
           {/* Folder selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-secondary mb-1">
               Folder (optional)
             </label>
             {!showNewFolder ? (
@@ -110,7 +110,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
                 <select
                   value={selectedFolder}
                   onChange={(e) => setSelectedFolder(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
+                  className="flex-1 px-3 py-2 border border-surface-border rounded-lg text-sm bg-surface text-content focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
                   disabled={isLoading}
                 >
                   <option value="">No folder</option>
@@ -135,7 +135,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   placeholder="Folder name"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
+                  className="flex-1 px-3 py-2 border border-surface-border rounded-lg text-sm bg-surface text-content focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
                   disabled={isLoading}
                 />
                 <button
@@ -144,7 +144,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
                     setShowNewFolder(false);
                     setNewFolderName('');
                   }}
-                  className="px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="px-3 py-2 text-sm text-content-secondary hover:bg-surface-tertiary rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -154,9 +154,9 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
 
           {/* Divider */}
           <div className="flex items-center gap-3 pt-1">
-            <div className="flex-1 border-t border-gray-200" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="flex-1 border-t border-gray-200" />
+            <div className="flex-1 border-t border-surface-border" />
+            <span className="text-xs text-content-tertiary">or</span>
+            <div className="flex-1 border-t border-surface-border" />
           </div>
 
           {/* OPML Import */}
@@ -173,7 +173,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm border border-surface-border text-content rounded-lg hover:bg-surface-secondary transition-colors disabled:opacity-50"
             >
               {importOpmlMutation.isPending ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -186,11 +186,11 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
 
           {/* Import result */}
           {importResult && (
-            <div className="text-sm bg-green-50 text-green-700 px-3 py-2 rounded-lg">
+            <div className="text-sm bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-3 py-2 rounded-lg">
               Imported {importResult.imported} feed{importResult.imported !== 1 ? 's' : ''}
               {importResult.skipped > 0 && `, ${importResult.skipped} already subscribed`}
               {importResult.errors && importResult.errors.length > 0 && (
-                <p className="mt-1 text-red-600 text-xs">
+                <p className="mt-1 text-red-600 dark:text-red-400 text-xs">
                   {importResult.errors.length} failed: {importResult.errors[0]}
                   {importResult.errors.length > 1 && ` (+${importResult.errors.length - 1} more)`}
                 </p>
@@ -200,7 +200,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
 
           {/* Error */}
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{error}</p>
           )}
 
           {/* Actions */}
@@ -208,7 +208,7 @@ export default function AddFeedModal({ onClose }: AddFeedModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm text-content-secondary hover:bg-surface-tertiary rounded-lg transition-colors"
               disabled={isLoading}
             >
               Cancel

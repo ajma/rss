@@ -8,7 +8,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="flex items-center justify-center h-screen bg-surface-secondary">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent-blue border-t-transparent" />
       </div>
     );

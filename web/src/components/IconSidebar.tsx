@@ -3,10 +3,13 @@ import {
   Bookmark,
   Search,
   PlusCircle,
-  Settings,
+  Sun,
+  Moon,
+  Monitor,
   LogOut,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import type { ViewMode } from './Layout';
 
 interface IconSidebarProps {
@@ -23,6 +26,22 @@ export default function IconSidebar({
   activeView,
 }: IconSidebarProps) {
   const { logout } = useAuth();
+  const { preference, setPreference } = useTheme();
+
+  const cycleTheme = () => {
+    const next = preference === 'light' ? 'dark' : preference === 'dark' ? 'system' : 'light';
+    setPreference(next);
+  };
+
+  const themeIcon =
+    preference === 'light' ? <Sun size={20} /> :
+    preference === 'dark' ? <Moon size={20} /> :
+    <Monitor size={20} />;
+
+  const themeLabel =
+    preference === 'light' ? 'Theme: Light' :
+    preference === 'dark' ? 'Theme: Dark' :
+    'Theme: System';
 
   const iconBtn = (
     icon: React.ReactNode,
@@ -36,7 +55,7 @@ export default function IconSidebar({
       className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-150 ${
         isActive
           ? 'bg-icon-active/20 text-icon-active'
-          : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
+          : 'text-sidebar-text hover:text-sidebar-text-active hover:bg-sidebar-hover'
       }`}
     >
       {icon}
@@ -44,7 +63,7 @@ export default function IconSidebar({
   );
 
   return (
-    <div className="flex flex-col items-center w-14 bg-icon-bg py-3 gap-1 shrink-0">
+    <div className="flex flex-col items-center w-14 bg-sidebar py-3 gap-1 shrink-0 border-r border-sidebar-border">
       {/* Logo */}
       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-accent-orange text-white font-bold text-sm mb-4">
         RS
@@ -72,7 +91,7 @@ export default function IconSidebar({
 
       {/* Bottom actions */}
       <div className="flex flex-col items-center gap-1">
-        {iconBtn(<Settings size={20} />, 'Settings', () => {})}
+        {iconBtn(themeIcon, themeLabel, cycleTheme)}
         {iconBtn(<LogOut size={20} />, 'Logout', logout)}
       </div>
     </div>

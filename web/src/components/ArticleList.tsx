@@ -122,14 +122,14 @@ export default function ArticleList({
   });
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-surface">
       {/* Header toolbar */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-surface-border bg-surface">
         {/* Expand sidebar button (shown when collapsed) */}
         {sidebarCollapsed && (
           <button
             onClick={onExpandSidebar}
-            className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 text-content-secondary hover:text-content hover:bg-surface-tertiary rounded-lg transition-colors"
             title="Expand sidebar"
           >
             <PanelLeftOpen size={18} />
@@ -138,8 +138,8 @@ export default function ArticleList({
 
         {/* Title */}
         <div className="flex items-center gap-1">
-          <h1 className="text-lg font-semibold text-gray-900">{view.title}</h1>
-          <ChevronDown size={16} className="text-gray-400" />
+          <h1 className="text-lg font-semibold text-content">{view.title}</h1>
+          <ChevronDown size={16} className="text-content-tertiary" />
         </div>
 
         {/* Filter dropdown */}
@@ -147,7 +147,7 @@ export default function ArticleList({
           <select
             value={articleFilter}
             onChange={(e) => setArticleFilter(e.target.value as ArticleFilter)}
-            className="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
+            className="text-sm bg-surface border border-surface-border rounded-lg px-2 py-1.5 text-content focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
           >
             <option value="all">All articles</option>
             <option value="unread">Unread only</option>
@@ -160,14 +160,14 @@ export default function ArticleList({
 
         {/* Search */}
         <div className="relative max-w-xs">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Search in articles"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-colors"
+            className="w-full pl-9 pr-3 py-1.5 text-sm border border-surface-border rounded-lg bg-surface-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-colors text-content"
           />
         </div>
 
@@ -176,20 +176,20 @@ export default function ArticleList({
           <button
             onClick={() => refetch()}
             title="Refresh"
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-content-secondary hover:text-content hover:bg-surface-tertiary rounded-lg transition-colors"
           >
             <Undo2 size={16} />
           </button>
           <button
             onClick={handleMarkAllRead}
             title="Mark all as read"
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-content-secondary hover:text-content hover:bg-surface-tertiary rounded-lg transition-colors"
           >
             <CheckCheck size={16} />
           </button>
           <button
             title="More options"
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-content-secondary hover:text-content hover:bg-surface-tertiary rounded-lg transition-colors"
           >
             <MoreHorizontal size={16} />
           </button>
@@ -203,7 +203,7 @@ export default function ArticleList({
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-accent-blue border-t-transparent" />
           </div>
         ) : articles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-16 text-content-tertiary">
             <Search size={40} className="mb-3 opacity-50" />
             <p className="text-lg font-medium">No articles found</p>
             <p className="text-sm mt-1">
