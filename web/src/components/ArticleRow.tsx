@@ -190,7 +190,7 @@ export default function ArticleRow({ article, isExpanded, isFocused, onToggle }:
       {isExpanded && (
         <div
           className={`px-4 pb-4 pl-[3.25rem] transition-all duration-300 ${
-            showContent ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0'
+            showContent ? 'opacity-100 max-h-none' : 'opacity-0 max-h-0'
           } overflow-hidden`}
         >
           <div className="bg-surface rounded-lg border border-surface-border p-5 shadow-sm">
