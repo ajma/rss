@@ -3,6 +3,7 @@ import { z } from 'zod';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { parseFeed, fetchAndStoreArticles } from '../services/feedParser';
+import { parseOpml } from '../services/opmlParser';
 
 export const feedsRouter = Router();
 
@@ -216,5 +217,117 @@ feedsRouter.patch('/:subscriptionId', async (req: AuthRequest, res: Response): P
   } catch (error) {
     console.error('Update subscription error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * POST /api/feeds/import-opml
+ * Import feeds from an OPML file. Accepts { opml: string } in the body.
+ * Creates folders as needed and subscribes to each feed.
+ */
+feedsRouter.post('/import-opml', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId!;
+    const { opml } = req.body;
+
+    if (!opml || typeof opml !== 'string') {
+      res.status(400).json({ error: 'Missing OPML content' });
+      return;
+    }
+
+    const entries = parseOpml(opml);
+    if (entries.length === 0) {
+      res.status(400).json({ error: 'No feeds found in OPML file' });
+      return;
+    }
+
+    // Resolve folders: create missing ones, cache by name
+    const folderCache = new Map<string, string>();
+    const existingFolders = await prisma.folder.findMany({
+      where: { userId },
+      select: { id: true, name: true },
+    });
+    for (const f of existingFolders) {
+      folderCache.set(f.name.toLowerCase(), f.id);
+    }
+
+    let maxOrder = (await prisma.folder.findFirst({
+      where: { userId },
+      orderBy: { order: 'desc' },
+      select: { order: true },
+    }))?.order ?? -1;
+
+    const getOrCreateFolder = async (name: string): Promise<string> => {
+      const key = name.toLowerCase();
+      const cached = folderCache.get(key);
+      if (cached) return cached;
+
+      maxOrder += 1;
+      const folder = await prisma.folder.create({
+        data: { name, userId, order: maxOrder },
+      });
+      folderCache.set(key, folder.id);
+      return folder.id;
+    };
+
+    let imported = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const entry of entries) {
+      try {
+        // Find or create the feed
+        let feed = await prisma.feed.findUnique({ where: { url: entry.xmlUrl } });
+
+        if (!feed) {
+          const parsed = await parseFeed(entry.xmlUrl);
+          feed = await prisma.feed.create({
+            data: {
+              title: parsed.title || entry.title || entry.xmlUrl,
+              url: entry.xmlUrl,
+              siteUrl: parsed.link || entry.htmlUrl || null,
+              faviconUrl: parsed.link
+                ? `https://www.google.com/s2/favicons?domain=${new URL(parsed.link).hostname}&sz=32`
+                : entry.htmlUrl
+                  ? `https://www.google.com/s2/favicons?domain=${new URL(entry.htmlUrl).hostname}&sz=32`
+                  : null,
+            },
+          });
+          // Fetch initial articles in background — don't block the import
+          fetchAndStoreArticles(feed.id, feed.url).catch((err) =>
+            console.error(`Failed to fetch articles for ${entry.xmlUrl}:`, err)
+          );
+        }
+
+        // Check if already subscribed
+        const existing = await prisma.subscription.findUnique({
+          where: { userId_feedId: { userId, feedId: feed.id } },
+        });
+        if (existing) {
+          skipped++;
+          continue;
+        }
+
+        // Resolve folder
+        const folderId = entry.folder ? await getOrCreateFolder(entry.folder) : null;
+
+        await prisma.subscription.create({
+          data: { userId, feedId: feed.id, folderId },
+        });
+        imported++;
+      } catch (err: any) {
+        errors.push(`${entry.xmlUrl}: ${err.message}`);
+      }
+    }
+
+    res.json({
+      imported,
+      skipped,
+      total: entries.length,
+      errors: errors.length > 0 ? errors : undefined,
+    });
+  } catch (error) {
+    console.error('OPML import error:', error);
+    res.status(500).json({ error: 'Failed to import OPML' });
   }
 });

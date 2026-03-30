@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSubscriptions, getFolders, subscribeFeed, unsubscribeFeed, createFolder, deleteFolder } from '../api/feeds';
+import { getSubscriptions, getFolders, subscribeFeed, unsubscribeFeed, createFolder, deleteFolder, importOpml } from '../api/feeds';
 
 export function useSubscriptions() {
   return useQuery({
@@ -55,6 +55,18 @@ export function useDeleteFolder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['folders'] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+    },
+  });
+}
+
+export function useImportOpml() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: importOpml,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
     },
   });
 }

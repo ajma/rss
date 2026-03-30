@@ -60,3 +60,15 @@ export async function renameFolder(id: string, name: string) {
 export async function deleteFolder(id: string) {
   await api.delete(`/api/folders/${id}`);
 }
+
+export interface ImportOpmlResult {
+  imported: number;
+  skipped: number;
+  total: number;
+  errors?: string[];
+}
+
+export async function importOpml(opml: string): Promise<ImportOpmlResult> {
+  const res = await api.post('/api/feeds/import-opml', { opml });
+  return res.data;
+}
