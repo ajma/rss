@@ -1,0 +1,44 @@
+name: Test Suite
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.x"
+          cache: "npm"
+
+      - name: Install required dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: server
+        env:
+          DATABASE_URL: file:./dev.db
+
+      - name: Run Server Tests
+        run: npx vitest run --reporter=default --reporter=junit --outputFile=../server-test-results.xml
+        working-directory: server
+
+      - name: Run Web Tests
+        run: npx vitest run --reporter=default --reporter=junit --outputFile=../web-test-results.xml
+        working-directory: web
+
+      - name: Test Summary
+        uses: test-summary/action@v2.4
+        if: always()
+        with:
+          paths: "*-test-results.xml"
