@@ -1,4 +1,5 @@
 import type { KeyboardShortcut } from './useKeyboardShortcuts';
+import type { ArticleFilter } from '../components/Layout';
 
 /**
  * Dependencies injected from Layout so shortcut definitions stay decoupled.
@@ -17,6 +18,7 @@ export interface ShortcutActions {
   toggleArticleSaved: () => void;
   markAllRead: () => void;
   toggleSidebar: () => void;
+  setArticleFilter: (filter: ArticleFilter) => void;
 }
 
 /**
@@ -108,6 +110,34 @@ export function buildKeyboardShortcuts(actions: ShortcutActions): KeyboardShortc
       group: 'Article navigation',
       label: 'Open in new tab',
       handler: actions.openArticleExternal,
+    },
+    {
+      key: '!',
+      shift: true,
+      group: 'Article navigation',
+      label: 'Show all articles',
+      handler: () => actions.setArticleFilter('all'),
+    },
+    {
+      key: '@',
+      shift: true,
+      group: 'Article navigation',
+      label: 'Show unread only',
+      handler: () => actions.setArticleFilter('unread'),
+    },
+    {
+      key: '#',
+      shift: true,
+      group: 'Article navigation',
+      label: 'Show read only',
+      handler: () => actions.setArticleFilter('read'),
+    },
+    {
+      key: '$',
+      shift: true,
+      group: 'Article navigation',
+      label: 'Show saved only',
+      handler: () => actions.setArticleFilter('saved'),
     },
 
     // ── Article manipulation ──

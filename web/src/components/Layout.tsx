@@ -8,6 +8,7 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { buildKeyboardShortcuts } from '../hooks/keyboardShortcutDefinitions';
 
 export type ViewMode = 'all' | 'feed' | 'folder' | 'saved';
+export type ArticleFilter = 'all' | 'unread' | 'saved' | 'read';
 
 interface ViewState {
   mode: ViewMode;
@@ -38,6 +39,7 @@ export default function Layout() {
   const toggleArticleSavedRef = useRef<((index: number) => void) | null>(null);
   const navigateArticleRef = useRef<((direction: 'next' | 'prev') => void) | null>(null);
   const toggleExpandedRef = useRef<(() => void) | null>(null);
+  const setArticleFilterRef = useRef<((filter: ArticleFilter) => void) | null>(null);
 
   const handleSelectFeed = (feedId: string, title: string) => {
     setView({ mode: 'feed', feedId, title });
@@ -85,6 +87,7 @@ export default function Layout() {
         },
         markAllRead: () => markAllReadRef.current?.(),
         toggleSidebar: () => setSidebarCollapsed((prev) => !prev),
+        setArticleFilter: (filter) => setArticleFilterRef.current?.(filter),
       }),
     [focusedIndex],
   );
@@ -138,6 +141,7 @@ export default function Layout() {
           toggleArticleSavedRef={toggleArticleSavedRef}
           navigateArticleRef={navigateArticleRef}
           toggleExpandedRef={toggleExpandedRef}
+          setArticleFilterRef={setArticleFilterRef}
           onArticleCountChange={setArticleCount}
           onFocusArticle={setFocusedIndex}
         />

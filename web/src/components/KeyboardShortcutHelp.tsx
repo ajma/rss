@@ -7,6 +7,13 @@ interface KeyboardShortcutHelpProps {
   onClose: () => void;
 }
 
+/** Map shifted-number symbols back to their digit for display */
+const SHIFT_SYMBOL_TO_DIGIT: Record<string, string> = {
+  '!': '1', '@': '2', '#': '3', '$': '4',
+  '%': '5', '^': '6', '&': '7', '*': '8',
+  '(': '9', ')': '0',
+};
+
 /** Human-readable label for a shortcut's key combo */
 function keyLabel(s: KeyboardShortcut): string {
   const parts: string[] = [];
@@ -21,7 +28,7 @@ function keyLabel(s: KeyboardShortcut): string {
         ? 'Enter'
         : s.key === 'Escape'
           ? 'Esc'
-          : s.key.toLowerCase();
+          : SHIFT_SYMBOL_TO_DIGIT[s.key] ?? s.key.toLowerCase();
   parts.push(keyName);
   return parts.join(' + ');
 }

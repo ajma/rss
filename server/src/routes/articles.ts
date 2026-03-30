@@ -20,6 +20,7 @@ articlesRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> =
       folderId,
       saved,
       search,
+      readFilter,
       page = '1',
       limit = '50',
     } = req.query as Record<string, string>;
@@ -59,6 +60,17 @@ articlesRouter.get('/', async (req: AuthRequest, res: Response): Promise<void> =
         { title: { contains: search } },
         { snippet: { contains: search } },
       ];
+    }
+
+    // Filter by read status
+    if (readFilter === 'unread') {
+      articleWhere.userArticles = {
+        none: { userId, isRead: true },
+      };
+    } else if (readFilter === 'read') {
+      articleWhere.userArticles = {
+        some: { userId, isRead: true },
+      };
     }
 
     // Filter saved articles at the DB level

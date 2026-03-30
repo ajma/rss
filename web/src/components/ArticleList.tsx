@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useArticles, useMarkAllRead, useMarkArticleRead, useToggleArticleSaved } from '../hooks/useArticles';
 import ArticleRow from './ArticleRow';
-import type { ViewMode } from './Layout';
+import type { ViewMode, ArticleFilter } from './Layout';
 
 interface ArticleListProps {
   view: { mode: ViewMode; feedId?: string; folderId?: string; title: string };
@@ -24,6 +24,7 @@ interface ArticleListProps {
   toggleArticleSavedRef: MutableRefObject<((index: number) => void) | null>;
   navigateArticleRef: MutableRefObject<((direction: 'next' | 'prev') => void) | null>;
   toggleExpandedRef: MutableRefObject<(() => void) | null>;
+  setArticleFilterRef: MutableRefObject<((filter: ArticleFilter) => void) | null>;
   onArticleCountChange: (count: number) => void;
   onFocusArticle: (index: number) => void;
 }
@@ -41,10 +42,12 @@ export default function ArticleList({
   toggleArticleSavedRef,
   navigateArticleRef,
   toggleExpandedRef,
+  setArticleFilterRef,
   onArticleCountChange,
   onFocusArticle,
 }: ArticleListProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [articleFilter, setArticleFilter] = useState<ArticleFilter>('all');
   const [expandedIndex, setExpandedIndex] = useState(-1);
 
   // Build query params based on view mode
@@ -52,10 +55,12 @@ export default function ArticleList({
     const params: any = { limit: 100 };
     if (view.mode === 'feed' && view.feedId) params.feedId = view.feedId;
     if (view.mode === 'folder' && view.folderId) params.folderId = view.folderId;
-    if (view.mode === 'saved') params.saved = true;
+    if (view.mode === 'saved' || articleFilter === 'saved') params.saved = true;
+    if (articleFilter === 'unread') params.readFilter = 'unread';
+    if (articleFilter === 'read') params.readFilter = 'read';
     if (searchQuery.trim()) params.search = searchQuery.trim();
     return params;
-  }, [view, searchQuery]);
+  }, [view, searchQuery, articleFilter]);
 
   const { data, isLoading, refetch } = useArticles(queryParams);
   const markAllReadMutation = useMarkAllRead();
@@ -97,6 +102,9 @@ export default function ArticleList({
         toggleSavedMutation.mutate({ id: article.id, isSaved: !article.isSaved });
       }
     };
+    setArticleFilterRef.current = (filter: ArticleFilter) => {
+      setArticleFilter(filter);
+    };
     toggleExpandedRef.current = () => {
       setExpandedIndex((prev) => (prev >= 0 ? -1 : focusedIndex));
     };
@@ -136,10 +144,15 @@ export default function ArticleList({
 
         {/* Filter dropdown */}
         <div className="flex items-center gap-1 ml-2">
-          <select className="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-blue/50">
-            <option>All articles</option>
-            <option>Unread only</option>
-            <option>Read only</option>
+          <select
+            value={articleFilter}
+            onChange={(e) => setArticleFilter(e.target.value as ArticleFilter)}
+            className="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
+          >
+            <option value="all">All articles</option>
+            <option value="unread">Unread only</option>
+            <option value="read">Read only</option>
+            <option value="saved">Saved</option>
           </select>
         </div>
 

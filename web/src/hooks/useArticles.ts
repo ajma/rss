@@ -1,5 +1,29 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getArticles, getArticle, markArticleRead, toggleArticleSaved, markAllRead } from '../api/articles';
+import { getArticles, getArticle, markArticleRead, toggleArticleSaved, markAllRead, type ArticleListResponse } from '../api/articles';
+
+/**
+ * Optimistically update an article's fields in all cached article lists.
+ * Articles stay in the list even if they no longer match the active filter —
+ * they'll be removed on the next explicit refresh or filter change.
+ */
+function optimisticArticleUpdate(
+  queryClient: ReturnType<typeof useQueryClient>,
+  id: string,
+  fields: Partial<{ isRead: boolean; isSaved: boolean }>,
+) {
+  queryClient.setQueriesData<ArticleListResponse>(
+    { queryKey: ['articles'] },
+    (old) => {
+      if (!old) return old;
+      return {
+        ...old,
+        articles: old.articles.map((a) =>
+          a.id === id ? { ...a, ...fields } : a
+        ),
+      };
+    },
+  );
+}
 
 export function useArticles(params: {
   feedId?: string;
@@ -29,8 +53,11 @@ export function useMarkArticleRead() {
   return useMutation({
     mutationFn: ({ id, isRead }: { id: string; isRead: boolean }) =>
       markArticleRead(id, isRead),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['articles'] });
+    onMutate: async ({ id, isRead }) => {
+      await queryClient.cancelQueries({ queryKey: ['articles'] });
+      optimisticArticleUpdate(queryClient, id, { isRead });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
       queryClient.invalidateQueries({ queryKey: ['folders'] });
     },
@@ -42,8 +69,13 @@ export function useToggleArticleSaved() {
   return useMutation({
     mutationFn: ({ id, isSaved }: { id: string; isSaved: boolean }) =>
       toggleArticleSaved(id, isSaved),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['articles'] });
+    onMutate: async ({ id, isSaved }) => {
+      await queryClient.cancelQueries({ queryKey: ['articles'] });
+      optimisticArticleUpdate(queryClient, id, { isSaved });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
     },
   });
 }
